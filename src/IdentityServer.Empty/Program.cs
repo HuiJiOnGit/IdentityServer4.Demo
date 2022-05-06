@@ -26,9 +26,9 @@ Log.Information("Starting host...");
 #region ConfigureServices
 
 /*
- * ����������
- * 1.�û���¼���޷���ת�ؿͻ���.��������ο� https://www.cnblogs.com/i3yuan/p/14033016.html#autoid-20-0-0
- * 1.1 ����Ϊhttps, ���߽�cookies�� SameSite ���Ը�Ϊ Lax
+ * SameSite策略问题,chrome80后会出现
+ * 1.解决方案可见 https://www.cnblogs.com/i3yuan/p/14033016.html#autoid-20-0-0
+ * 1.1 将http升级为https
  */
 
 var builder = WebApplication.CreateBuilder(args);
@@ -39,26 +39,28 @@ var configuration = builder.Configuration;
 var connectionString = configuration.GetConnectionString("IdentityServer4");
 var migrationsAssembly = typeof(Program).Assembly.GetName().Name;
 
-//Identity��ϸ���ÿ��Բο���� https://www.cnblogs.com/i3yuan/p/14327822.html
+//Identity详细配置可见 https://www.cnblogs.com/i3yuan/p/14327822.html
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString));
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 {
     options.Password = new PasswordOptions
     {
-        RequireDigit = true, //Ҫ�������ֽ���0-9 ֮��,  Ĭ��true
-        RequiredLength = 5, //Ҫ��������С���ȣ�   Ĭ���� 6 ���ַ�
-        RequireLowercase = true, //Ҫ��Сд��ĸ,  Ĭ��true
-        RequireNonAlphanumeric = true, //Ҫ�������ַ�,  Ĭ��true
-        RequiredUniqueChars = 1, //Ҫ����Ҫ�����еķ��ظ��ַ���,  Ĭ��1
-        RequireUppercase = true //Ҫ���д��ĸ ��Ĭ��true
+        RequireDigit = true, //要求有数字介于0-9 之间,  默认true
+        RequiredLength = 5, //要求密码最小长度，   默认是 6 个字符
+        RequireLowercase = true, //要求小写字母,  默认true
+        RequireNonAlphanumeric = true, //要求特殊字符,  默认true
+        RequiredUniqueChars = 1, //要求需要密码中的非重复字符数,  默认1
+        RequireUppercase = true //要求大写字母 ，默认true
     };
     options.Lockout = new LockoutOptions
     {
-        AllowedForNewUsers = false, // ���û������˻�, Ĭ��true
-        DefaultLockoutTimeSpan = TimeSpan.FromMilliseconds(5), //����ʱ����Ĭ���� 5 ����
-        MaxFailedAccessAttempts = 3 //��¼��������Դ�����Ĭ�� 5 ��
+        AllowedForNewUsers = false, // 新用户锁定账户, 默认true
+        DefaultLockoutTimeSpan = TimeSpan.FromMilliseconds(5), //锁定时长，默认是 5 分钟
+        MaxFailedAccessAttempts = 3 //登录错误最大尝试次数，默认 5 次
     };
-    options.SignIn.RequireConfirmedAccount = true;
+    //这里需要注意的是 options.SignIn.RequireConfirmedAccount 设置项，缺省设置为true，
+    //这种情况下，新注册的用户需要进行确认才能完成注册，如果没有安装邮件系统，这个步骤无法完成，所以这里改为false。
+    options.SignIn.RequireConfirmedAccount = false;
 })
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultUI()
