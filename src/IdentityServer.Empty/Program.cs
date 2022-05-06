@@ -12,10 +12,10 @@ using IdentityServer.Empty.Data;
 
 Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
-                .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-                .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
-                .MinimumLevel.Override("System", LogEventLevel.Warning)
-                .MinimumLevel.Override("Microsoft.AspNetCore.Authentication", LogEventLevel.Information)
+                .MinimumLevel.Override("Microsoft", LogEventLevel.Debug)
+                .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Debug)
+                .MinimumLevel.Override("System", LogEventLevel.Information)
+                .MinimumLevel.Override("Microsoft.AspNetCore.Authentication", LogEventLevel.Debug)
                 .Enrich.FromLogContext()
                 .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}{NewLine}", theme: AnsiConsoleTheme.Code)
                 .CreateLogger();
@@ -34,6 +34,7 @@ Log.Information("Starting host...");
 var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseSerilog();
 builder.Services.AddControllersWithViews();
+builder.Services.AddRazorPages();
 
 var configuration = builder.Configuration;
 var connectionString = configuration.GetConnectionString("IdentityServer4");
@@ -60,7 +61,12 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
     };
     //这里需要注意的是 options.SignIn.RequireConfirmedAccount 设置项，缺省设置为true，
     //这种情况下，新注册的用户需要进行确认才能完成注册，如果没有安装邮件系统，这个步骤无法完成，所以这里改为false。
-    options.SignIn.RequireConfirmedAccount = false;
+    options.SignIn = new SignInOptions
+    {
+        RequireConfirmedAccount = false,
+        RequireConfirmedEmail = false,
+        RequireConfirmedPhoneNumber = false,
+    };
 })
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultUI()
@@ -91,9 +97,9 @@ builder.Services.AddIdentityServer(options =>
 {
     options.ConfigureDbContext = b => b.UseSqlServer(connectionString,
         sql => sql.MigrationsAssembly(migrationsAssembly));
-    // �Զ����� token ����ѡ
+    // 自动清理 token ，可选
     options.EnableTokenCleanup = true;
-    // �Զ����� token ����ѡ
+    // 自动清理 token ，可选
     options.TokenCleanupInterval = 30;
 })
 .AddAspNetIdentity<ApplicationUser>()
@@ -101,8 +107,8 @@ builder.Services.AddIdentityServer(options =>
 
 #endregion IdentityServer4
 
-//��̨����config��̬��Ԥ�����ֶε����ݿ�
-builder.Services.AddHostedService<InitializeDatabaseBackgroundServices>();
+//初始化数据,初始化之后可以注释
+//builder.Services.AddHostedService<InitializeDatabaseBackgroundServices>();
 
 var app = builder.Build();
 #endregion ConfigureServices
@@ -113,8 +119,9 @@ app.UseDeveloperExceptionPage();
 app.UseStaticFiles();
 app.UseIdentityServer();
 app.UseAuthentication();;
-app.UseAuthorization();//�ͻ���������Ȩҳ(Consent)����Ҫ�������
+app.UseAuthorization();//必须要用授权中间件,因为授权页面需要这个
 app.MapDefaultControllerRoute();
+app.MapRazorPages();
 app.Run();
 
 #endregion Configure

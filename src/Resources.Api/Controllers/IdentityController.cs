@@ -14,6 +14,7 @@ public class IdentityController : ControllerBase
     {
         _logger = loggerFactory.CreateLogger<IdentityController>();
     }
+
     [HttpGet]
     public IActionResult Get()
     {

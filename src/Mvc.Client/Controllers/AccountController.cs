@@ -10,7 +10,7 @@ namespace Mvc.Client.Controllers
         [Authorize]
         public IActionResult RemoteLogin()
         {
-            return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller",""));
+            return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
         }
 
         public IActionResult Logout()

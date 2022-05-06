@@ -1,5 +1,5 @@
-﻿using IdentityModel;
-using System.Security.Claims;
+﻿using System.Security.Claims;
+using IdentityModel;
 using IdentityServer.Empty.Data;
 using IdentityServer.Empty.Models;
 using IdentityServer4.EntityFramework.DbContexts;
