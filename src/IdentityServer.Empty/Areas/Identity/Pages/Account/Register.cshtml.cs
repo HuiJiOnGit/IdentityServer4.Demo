@@ -41,19 +41,22 @@ namespace IdentityServer.Empty.Areas.Identity.Pages.Account
 
         public class InputModel
         {
+            [Required(ErrorMessage = "用户名是必填的"), StringLength(20,ErrorMessage = "用户最多为20个字符"), Display(Name = "用户名")]
+            public string UserName { get; set; }
+
             [Required]
             [EmailAddress]
-            [Display(Name = "Email")]
+            [Display(Name = "邮箱")]
             public string Email { get; set; }
 
             [Required]
             [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
             [DataType(DataType.Password)]
-            [Display(Name = "Password")]
+            [Display(Name = "密码")]
             public string Password { get; set; }
 
             [DataType(DataType.Password)]
-            [Display(Name = "Confirm password")]
+            [Display(Name = "确认密码")]
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
             public string ConfirmPassword { get; set; }
         }
@@ -70,7 +73,7 @@ namespace IdentityServer.Empty.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser { UserName = Input.Email, Email = Input.Email };
+                var user = new ApplicationUser { UserName = Input.UserName, Email = Input.Email };
                 var result = await _userManager.CreateAsync(user, Input.Password);
                 if (result.Succeeded)
                 {
