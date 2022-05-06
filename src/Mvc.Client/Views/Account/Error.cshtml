@@ -1,0 +1,18 @@
+﻿<h1>登录失败</h1>
+<br />
+<p><strong id="time" style="color:red">5</strong>秒后即将返回首页</p>
+
+<script type="text/javascript">
+
+window.onload = function() {
+    let times = 5;
+    setInterval(() => {
+        times--;
+        document.querySelector('#time').innerHTML = times;
+        if(times === 0){
+            window.location.href = "/";
+        }
+    },1000);
+}
+
+</script>
