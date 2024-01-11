@@ -27,8 +27,9 @@ Log.Information("Starting host...");
 
 /*
  * SameSite策略问题,chrome80后会出现
- * 1.解决方案可见 https://www.cnblogs.com/i3yuan/p/14033016.html#autoid-20-0-0
- * 1.1 将http升级为https
+ * 解决方案可见 https://www.cnblogs.com/i3yuan/p/14033016.html#autoid-20-0-0
+ * 1. 将http升级为https
+ * 2. 增加一个Cookie的配置(可以参考Blog.IdentityServer)
  */
 
 var builder = WebApplication.CreateBuilder(args);
